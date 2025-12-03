@@ -7,7 +7,7 @@ interface PostBoxProperties {
     timestamp: Date | string;
     post_url: string;
     user_handle: string;
-    img: string;
+    img?: string;
 }
 
 export function PostBox({
@@ -17,7 +17,7 @@ export function PostBox({
     timestamp,
     post_url,
     user_handle,
-    img,
+    // img,
 }: PostBoxProperties) {
 
     let formattedTimestamp = '';
@@ -46,7 +46,7 @@ export function PostBox({
             {post_content ? (
                 <p className="row-middle post-content margin-zero">{post_content}</p>
             ) : (
-                <p className="row-middle post-content margin-zero">❌ There's no content to display here. Please check the source.</p>
+                <p className="row-middle post-content margin-zero">❌📺 Sorry, there's no textual content to display here. Please check the source to view the media directly.</p>
             )}
 
             <div className="row-bottom post-details margin-zero">

@@ -11,7 +11,7 @@ interface PostBoxData {
     timestamp: Date | string; 
     post_url: string;
     user_handle: string;
-    img: string;
+    // img: string;
 }
 
 const firebaseConfig = {
@@ -52,7 +52,7 @@ function App() {
               timestamp: timestampValue,
               post_url: data.url || 'http://localhost/',
               user_handle: data.account?.username || 'N/A',
-              img: (media?.type === 'video' ? media.preview_url : media?.url) || '',
+              // img: (media?.type === 'video' ? media.preview_url : media?.url) || '',
           } as PostBoxData;
       });
       
@@ -100,7 +100,7 @@ function App() {
                     timestamp={post.timestamp}
                     post_url={post.post_url}
                     user_handle={post.user_handle}
-                    img={post.img}
+                    // img={post.img}
                 />
             ))
         ) : (
