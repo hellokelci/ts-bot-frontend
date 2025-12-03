@@ -39,9 +39,9 @@ function App() {
       const fetchedPosts = snapshot.docs.map(doc => {
           const data = doc.data();
           
-          const media = data.media_attachments && data.media_attachments.length > 0
-            ? data.media_attachments[0]
-            : null;
+          // const media = data.media_attachments && data.media_attachments.length > 0
+          //   ? data.media_attachments[0]
+          //   : null;
 
           const timestampValue = data.created_at?.toDate ? data.created_at.toDate() : new Date(data.created_at);
 
@@ -69,7 +69,8 @@ function App() {
             const resultText = await response.text(); 
             setData(resultText);
         } catch (error) {
-            setData(`Error reaching Cloud Run service: ${error.message}`);
+            const e = error as Error;
+            setData(`Error reaching Cloud Run service: ${e.message}`);
         }
     };
     
