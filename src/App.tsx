@@ -31,52 +31,65 @@ function App() {
   const [posts, setPosts] = useState<PostBoxData[]>([]);
   const [data, setData] = useState<string>('Loading...'); 
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const postsCollectionRef = collection(db, POSTS_COLLECTION);
-      const snapshot = await getDocs(postsCollectionRef);
-      
-      const fetchedPosts = snapshot.docs.map(doc => {
-          const data = doc.data();
-          
-          // const media = data.media_attachments && data.media_attachments.length > 0
-          //   ? data.media_attachments[0]
-          //   : null;
-
-          const timestampValue = data.created_at?.toDate ? data.created_at.toDate() : new Date(data.created_at);
-
-          return {
-              user_profile_icon: data.account?.avatar || '',
-              post_id: data.id || doc.id,
-              post_content: data.content || data.spoiler_text || '',
-              timestamp: timestampValue,
-              post_url: data.url || 'http://localhost/',
-              user_handle: data.account?.username || 'N/A',
-              // img: (media?.type === 'video' ? media.preview_url : media?.url) || '',
-          } as PostBoxData;
-      });
-      
-      setPosts(fetchedPosts);
-    };
-
-    const fetchFlaskData = async () => {
+useEffect(() => {
+    const fetchAllData = async () => {
+      const fetchPosts = async () => {
         try {
-            if (!API_URL) {
-                setData("Error: FLASK URL has not configured.");
-                return;
-            }
-            const response = await fetch(API_URL);
-            const resultText = await response.text(); 
-            setData(resultText);
+          const postsCollectionRef = collection(db, POSTS_COLLECTION);
+          const snapshot = await getDocs(postsCollectionRef);
+          
+          const fetchedPosts = snapshot.docs.map(doc => {
+            const data = doc.data();
+            console.log("Processing Firestore document data:", data);
+            
+            // const media = data.media_attachments && data.media_attachments.length > 0
+            //   ? data.media_attachments[0]
+            //   : null;
+
+            const timestampValue = data.created_at?.toDate ? data.created_at.toDate() : new Date(data.created_at);
+
+            return {
+                user_profile_icon: data.account?.avatar || '',
+                post_id: data.id || doc.id,
+                post_content: data.content || data.spoiler_text || '',
+                timestamp: timestampValue,
+                post_url: data.url || 'http://localhost/',
+                user_handle: data.account?.username || 'N/A',
+                // img: (media?.type === 'video' ? media.preview_url : media?.url) || '',
+            } as PostBoxData;
+          });
+          
+          setPosts(fetchedPosts);
         } catch (error) {
-            const e = error as Error;
-            setData(`Error reaching Cloud Run service: ${e.message}`);
+
+          console.error("Firestore Data Fetch or Mapping Error:", error);
+
         }
+      };
+
+      const fetchFlaskData = async () => {
+        try {
+          if (!API_URL) {
+            setData("Error: FLASK URL has not configured.");
+            return;
+          }
+          const response = await fetch(API_URL);
+          const resultText = await response.text(); 
+          setData(resultText);
+        } catch (error) {
+
+          const e = error as Error;
+          setData(`Error reaching Cloud Run service: ${e.message}`);
+        }
+      };
+      
+      await Promise.allSettled([
+        fetchPosts(),
+        fetchFlaskData()
+      ]);
     };
-    
-    fetchPosts();
-    fetchFlaskData();
-    
+  
+    fetchAllData();
   }, []);
 
   return (
