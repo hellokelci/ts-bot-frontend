@@ -11,7 +11,6 @@ interface PostBoxData {
     timestamp: Date | string; 
     post_url: string;
     user_handle: string;
-    // img: string;
 }
 
 const firebaseConfig = {
