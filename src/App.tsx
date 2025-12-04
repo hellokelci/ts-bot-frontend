@@ -3,6 +3,7 @@ import './css/App.css';
 import { PostBox } from './components/PostBox';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { SearchBar } from './components/SearchBar';
 
 interface PostBoxData {
     user_profile_icon: string;
@@ -11,6 +12,7 @@ interface PostBoxData {
     timestamp: Date | string; 
     post_url: string;
     user_handle: string;
+    // img: string;    
 }
 
 const firebaseConfig = {
@@ -28,7 +30,9 @@ const POSTS_COLLECTION = "dt_posts";
 function App() {
 
   const [posts, setPosts] = useState<PostBoxData[]>([]);
+  const [allPosts, setAllPosts] = useState<PostBoxData[]>([]);
   const [data, setData] = useState<string>('Loading...'); 
+  const [searchTerm, setSearchTerm] = useState(''); 
 
 useEffect(() => {
     const fetchAllData = async () => {
@@ -41,10 +45,6 @@ useEffect(() => {
             const data = doc.data();
             console.log("Processing Firestore document data:", data);
             
-            // const media = data.media_attachments && data.media_attachments.length > 0
-            //   ? data.media_attachments[0]
-            //   : null;
-
             const timestampValue = data.created_at?.toDate ? data.created_at.toDate() : new Date(data.created_at);
 
             return {
@@ -59,6 +59,7 @@ useEffect(() => {
           });
           
           setPosts(fetchedPosts);
+          setAllPosts(fetchedPosts);
         } catch (error) {
 
           console.error("Firestore Data Fetch or Mapping Error:", error);
@@ -91,6 +92,22 @@ useEffect(() => {
     fetchAllData();
   }, []);
 
+  useEffect(() => {
+    if (searchTerm.length === 0) {
+      setPosts(allPosts);
+      return;
+    }
+
+    const lowerCaseSearch = searchTerm.toLowerCase();
+    
+    const filtered = allPosts.filter(post => 
+      post.user_handle.toLowerCase().includes(lowerCaseSearch) ||
+      post.post_content.toLowerCase().includes(lowerCaseSearch)
+    );
+    
+    setPosts(filtered);
+  }, [searchTerm, allPosts]);
+
   return (
     <div className="container-tsbot">
       <h1 className="text-align-center">YouTube-Mentions Dashboard</h1>
@@ -101,6 +118,7 @@ useEffect(() => {
       </p>
       
       <p className="text-align-center">Here are some pulled posts from the <a href='https://console.firebase.google.com/u/0/project/ts-bot-external-test/firestore/databases/-default-/data/~2Fdt_posts' target='_blank'>Firestore Database</a>:</p>
+      <SearchBar onSearchChange={setSearchTerm} />
       
       <div>
         {posts.length > 0 ? (
@@ -117,7 +135,9 @@ useEffect(() => {
                 />
             ))
         ) : (
-            <p className="text-align-center service-response">Loading posts from Firestore...</p>
+            <p className="text-align-center service-response">
+              {allPosts.length === 0 ? "Loading posts from Firestore..." : "Sorry, there are no posts in the database which contain your keywords."}
+            </p>
         )}
       </div>
     </div>
